@@ -55,3 +55,18 @@ after a file. For example: `/etc/fstab # Backup harddrive mount locations` is
 
 Currently SFS only supports backing up files, not whole directories. If you
 want multiple files in a directory backed up, list each one separately.
+
+## Example Directory Structure
+
+Running `systemfilesaver.py` with the example `systemfile_list.txt` listed
+above on a machine with the hostname `desktop` would generate the following
+directory structure in `~/.systemfiles`:
+
+    .systemfiles/
+    ├── desktop/
+    │   └── etc/
+    │       ├── fstab
+    │       └── ssh
+    │           └── sshd_config
+    └── systemfile_list.txt
+
