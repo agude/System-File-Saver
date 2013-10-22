@@ -66,7 +66,7 @@ directory structure in `~/.systemfiles`:
     ├── desktop/
     │   └── etc/
     │       ├── fstab
-    │       └── ssh
+    │       └── ssh/
     │           └── sshd_config
     └── systemfile_list.txt
 
