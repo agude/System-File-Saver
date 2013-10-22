@@ -151,7 +151,7 @@ if __name__ == '__main__':
     # Allows command line options to be parsed.
     from optparse import OptionParser  # Command line parsing
 
-    usage = "usage: %prog [Options] -f "
+    usage = "usage: %prog [Options]"
     version = "%prog Version 1.0\n\nCopyright (C) 2013 Alexander Gude - alex.public.account+systemfilesaver@gmail.com\nThis is free software.  You may redistribute copies of it under the terms of\nthe GNU General Public License <http://www.gnu.org/licenses/gpl.html>.\nThere is NO WARRANTY, to the extent permitted by law.\n\nWritten by Alexander Gude."
     parser = OptionParser(usage=usage, version=version)
     parser.add_option("-f", "--input-file", action="store", type="str", dest="input_file", default="~/.systemfiles/systemfile_list.txt", help="input file containing a list of files to backup, one per line [~/.systemfiles/systemfile_list.txt]")
