@@ -11,19 +11,16 @@ import logging
 class FileList:
     """ A class to handle the input list of files """
 
-    def __init__(self, input_file, verbosity):
+    def __init__(self, input_file):
         """ Read the input_file for files to backup, check that they exist, and
         add them to a list """
         self.input_file = input_file
         self.files = set()  # Doesn't allow duplicates
-        self.verbosity = verbosity
 
         # Check the input file
         if not isfile(input_file):
-            if self.verbosity >= 1:
-                exit("Input file list not found!")
-            else:
-                exit(1)
+            logging.fatal("Input file list not found!")
+            exit(1)
 
         # Collect filenames to backup, but only if they are existent files
         with open(input_file, "r") as f:
@@ -35,8 +32,7 @@ class FileList:
                 if isfile(l):
                     self.files.add(line)
                 else:
-                    if self.verbosity >= 1:
-                        print(line, " is not a valid file!")
+                    logging.warn("%s is not a valid file", line)
 
         # Split files
         self.__split()
@@ -67,33 +63,30 @@ class FileList:
 class Rsyncer:
     """ A class to handle running rsync """
 
-    def __init__(
-        self, rsync_loc, file_list, target_directory, hostname, verbosity, flags=set()
-    ):
+    def __init__(self, rsync_loc, file_list, target_directory, hostname, flags=set()):
         self.rsync_loc = rsync_loc
         self.file_list = file_list
         self.target_directory = target_directory
         self.hostname = hostname
-        self.verbosity = verbosity
         self.flags = " ".join(flags)
 
         # Check output directory
         if not isdir(self.target_directory):
-            if verbosity >= 1:
-                exit("Target directory not found!")
-            else:
-                exit(1)
+            logging.fatal("Target directory not found!")
+            exit(1)
 
         # Build command
         self.__buildCommand()
 
     def __buildCommand(self):
         """ Build the rsync command that will be called. """
-        # Set verbosity
-        verb = ""
-        if self.verbosity >= 2:
+        logging_level = logging.getLogger().getEffectiveLevel()
+        VERBOSE = (logging.WARNING, logging.INFO, logging.DEBUG)
+        if logging_leve in VERBOSE:
+            verbosity = True
             verb = "--verbose"
-        elif self.verbosity == 0:
+        else:
+            verbosity = False
             verb = "--quiet"
 
         # Build command
@@ -117,7 +110,7 @@ class Rsyncer:
         self.command.append(full_target)
         com = " ".join(self.command)
         # print(com)
-        if verbosity >= 1:
+        if verbosity:
             call(com, shell=True)
         else:
             call(com, stdout=open(devnull, "wb"), shell=True)
@@ -152,21 +145,6 @@ def main():
         help="files are saved in target_directory/hostname/ [$HOSTNAME]",
     )
     parser.add_argument(
-        "-v",
-        "--verbose",
-        dest="verbose",
-        default=False,
-        help="print some extra status messages to stdout [false]",
-    )
-    parser.add_argument(
-        "-q",
-        "--quiet",
-        action="store_true",
-        dest="quiet",
-        default=False,
-        help="do not print any messages to stdout [false]",
-    )
-    parser.add_argument(
         "--dry-run",
         action="store_true",
         dest="dry_run",
@@ -194,25 +172,24 @@ def main():
         default=False,
         help="run rsync with --delete-after [false]",
     )
+    parser.add_argument(
+        "--log",
+        help="set the logging level, defaults to WARNING",
+        dest="log_level",
+        default=logging.WARNING,
+        choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+    )
 
     args = parser.parse_args()
-
-    # Set verbosity
-    verbosity = 1
-    if args.quiet:
-        verbosity = 0
-    elif args.verbose:
-        verbosity = 2
+    logging.debug("Arguments: %s", args)
 
     # Check if rsync exists
     from distutils.spawn import find_executable
 
     rsync_loc = find_executable("rsync")
     if rsync_loc is None:
-        if verbosity >= 1:
-            exit("Can not find rsync.")
-        else:
-            exit(1)
+        logging.critical("Can not find rsync")
+        exit(1)
 
     # Set up the hostname
     if args.hostname is None:
@@ -234,8 +211,8 @@ def main():
     args.input_file = expanduser(args.input_file)
 
     # Set up and run rsync
-    fl = FileList(args.input_file, verbosity)
-    rs = Rsyncer(rsync_loc, fl, args.target_directory, args.hostname, verbosity, flags)
+    fl = FileList(args.input_file)
+    rs = Rsyncer(rsync_loc, fl, args.target_directory, args.hostname, flags)
 
 
 if __name__ == "__main__":
