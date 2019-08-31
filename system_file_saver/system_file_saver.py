@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import argparse
 from os import devnull
 from os.path import isfile, isdir, expanduser, normpath, split
 from socket import gethostname
@@ -122,51 +123,42 @@ class Rsyncer:
             call(com, stdout=open(devnull, "wb"), shell=True)
 
 
-##### START OF CODE
-if __name__ == "__main__":
-
-    # Allows command line options to be parsed.
-    from optparse import OptionParser  # Command line parsing
-
-    usage = "usage: %prog [Options]"
-    version = "%prog Version 1.0\n\nCopyright (C) 2013 Alexander Gude - alex.public.account+systemfilesaver@gmail.com\nThis is free software.  You may redistribute copies of it under the terms of\nthe GNU General Public License <http://www.gnu.org/licenses/gpl.html>.\nThere is NO WARRANTY, to the extent permitted by law.\n\nWritten by Alexander Gude."
-    parser = OptionParser(usage=usage, version=version)
-    parser.add_option(
+def main():
+    parser = argparse.ArgumentParser(
+        prog="System File Saver", description="Backup files in Linux"
+    )
+    parser.add_argument(
         "-f",
         "--input-file",
-        action="store",
         type="str",
         dest="input_file",
         default="~/.systemfiles/systemfile_list.txt",
         help="input file containing a list of files to backup, one per line [~/.systemfiles/systemfile_list.txt]",
     )
-    parser.add_option(
+    parser.add_argument(
         "-t",
         "--target-directory",
-        action="store",
         type="str",
         dest="target_directory",
         default="~/.systemfiles/",
         help="target folder for saving systemfiles [~/.systemfiles/]",
     )
-    parser.add_option(
+    parser.add_argument(
         "-o",
         "--hostname",
-        action="store",
         type="str",
         dest="hostname",
         default=None,
         help="files are saved in target_directory/hostname/ [$HOSTNAME]",
     )
-    parser.add_option(
+    parser.add_argument(
         "-v",
         "--verbose",
-        action="store_true",
         dest="verbose",
         default=False,
         help="print some extra status messages to stdout [false]",
     )
-    parser.add_option(
+    parser.add_argument(
         "-q",
         "--quiet",
         action="store_true",
@@ -174,28 +166,28 @@ if __name__ == "__main__":
         default=False,
         help="do not print any messages to stdout [false]",
     )
-    parser.add_option(
+    parser.add_argument(
         "--dry-run",
         action="store_true",
         dest="dry_run",
         default=False,
         help="run rsync with --dry-run [false]",
     )
-    parser.add_option(
+    parser.add_argument(
         "--itemize-changes",
         action="store_true",
         dest="itemize_changes",
         default=False,
         help="run rsync with --itemize-changes [false]",
     )
-    parser.add_option(
+    parser.add_argument(
         "--checksum",
         action="store_true",
         dest="checksum",
         default=False,
         help="run rsync with --checksum [false]",
     )
-    parser.add_option(
+    parser.add_argument(
         "--delete-after",
         action="store_true",
         dest="delete_after",
@@ -203,13 +195,13 @@ if __name__ == "__main__":
         help="run rsync with --delete-after [false]",
     )
 
-    (options, args) = parser.parse_args()
+    args = parser.parse_args()
 
     # Set verbosity
     verbosity = 1
-    if options.quiet:
+    if args.quiet:
         verbosity = 0
-    elif options.verbose:
+    elif args.verbose:
         verbosity = 2
 
     # Check if rsync exists
@@ -223,26 +215,28 @@ if __name__ == "__main__":
             exit(1)
 
     # Set up the hostname
-    if options.hostname is None:
-        options.hostname = gethostname()
+    if args.hostname is None:
+        args.hostname = gethostname()
 
     # Set up extra flags
     flags = []
-    if options.dry_run:
+    if args.dry_run:
         flags.append("--dry-run")
-    if options.itemize_changes:
+    if args.itemize_changes:
         flags.append("--itemize-changes")
-    if options.checksum:
+    if args.checksum:
         flags.append("--checksum")
-    if options.delete_after:
+    if args.delete_after:
         flags.append("--delete-after")
 
     # Expand the input directory and file
-    options.target_directory = expanduser(options.target_directory)
-    options.input_file = expanduser(options.input_file)
+    args.target_directory = expanduser(args.target_directory)
+    args.input_file = expanduser(args.input_file)
 
     # Set up and run rsync
-    fl = FileList(options.input_file, verbosity)
-    rs = Rsyncer(
-        rsync_loc, fl, options.target_directory, options.hostname, verbosity, flags
-    )
+    fl = FileList(args.input_file, verbosity)
+    rs = Rsyncer(rsync_loc, fl, args.target_directory, args.hostname, verbosity, flags)
+
+
+if __name__ == "__main__":
+    main()
