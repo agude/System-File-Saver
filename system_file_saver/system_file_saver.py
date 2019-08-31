@@ -123,7 +123,6 @@ def main():
     parser.add_argument(
         "-f",
         "--input-file",
-        type="str",
         dest="input_file",
         default="~/.systemfiles/systemfile_list.txt",
         help="input file containing a list of files to backup, one per line [~/.systemfiles/systemfile_list.txt]",
@@ -131,7 +130,6 @@ def main():
     parser.add_argument(
         "-t",
         "--target-directory",
-        type="str",
         dest="target_directory",
         default="~/.systemfiles/",
         help="target folder for saving systemfiles [~/.systemfiles/]",
@@ -139,7 +137,6 @@ def main():
     parser.add_argument(
         "-o",
         "--hostname",
-        type="str",
         dest="hostname",
         default=None,
         help="files are saved in target_directory/hostname/ [$HOSTNAME]",
