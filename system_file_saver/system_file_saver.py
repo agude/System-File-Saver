@@ -1,13 +1,10 @@
 #!/usr/bin/env python3
 
-from sys import exit  # Cleanly exit program
-from subprocess import call  # Access external programs
-from socket import gethostname  # Get the computer's name
-from os import devnull  # Allow piping to /dev/null
-
-# Check that files and directories exist, expand ~ in names, normalize a path,
-# and split paths into components
+from os import devnull
 from os.path import isfile, isdir, expanduser, normpath, split
+from socket import gethostname
+from subprocess import call
+import logging
 
 
 class FileList:
