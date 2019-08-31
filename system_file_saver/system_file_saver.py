@@ -82,7 +82,7 @@ class Rsyncer:
         """ Build the rsync command that will be called. """
         logging_level = logging.getLogger().getEffectiveLevel()
         VERBOSE = (logging.WARNING, logging.INFO, logging.DEBUG)
-        if logging_leve in VERBOSE:
+        if logging_level in VERBOSE:
             verbosity = True
             verb = "--verbose"
         else:
